@@ -1,0 +1,47 @@
+<html>
+<head>
+	<title>BibTeX Tidier</title>
+	<style>
+		body {
+			font-family: Helvetica, sans-serif;
+			color: #333;
+			
+		}
+		h1 {
+			font-weight: 100;
+		}
+		a {
+			color: #4183D7;
+		}
+		textarea {
+			width: 100%;
+			height: 400px;
+		}
+		p, textarea {
+			max-width: 780px;
+		}
+		button {
+			padding: 6px 40px;
+		}
+	</style>
+</head>
+<body>
+	<h1>BibTeX Tidier</h1>
+	<p>This tool tidies bibtex files by making indents and spacing consistent, and cleaning unneeded new lines. <a href="https://github.com/FlamingTempura/bibtex-tidy">Instructions on GitHub</a>.</p>
+	<p>Enter your bibtex and click "Tidy":</p>
+	<textarea id="a"></textarea>
+	<p><button onclick="tidy()">Tidy</button></p>
+	<p>Tidied:</p>
+	<textarea id="b"></textarea>
+
+	<script src="https://unpkg.com/bibtex-tidy"></script>
+	<script>
+	window.tidy = function () {
+		console.log('go')
+		var bibtex = document.getElementById('a').value;
+		var result = bibtexTidy.tidy(bibtex);
+		document.getElementById('b').value = result.bibtex;
+	};
+</script>
+</body>
+</html>
