@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Online BibTeX Tidy - Clean and format BibTeX files</title>
-	<meta lang="en" name="description" content="Online tool for cleaning up messy BibTeX files by making spacing consistent, removing unwanted properties, and sorting entries.">
+	<title>Online BibTeX Tidy - Clean, format, and analyse BibTeX files</title>
+	<meta lang="en" name="description" content="Online tool for cleaning up messy BibTeX files by making spacing consistent, removing duplicates, removing unwanted properties, and sorting entries.">
 	<style>
 		body {
 			font-family: Helvetica, sans-serif;
@@ -41,13 +41,18 @@
 			color: white;
 			padding: 8px;
 		}
+		#feedback {
+			font-size: 13px;
+		}
 		.error #a { background: #F1A9A0; }
 		.error #error { display: block; }
+		.error #feedback { display: none; }
+		#result { display: none; }
 	</style>
 </head>
 <body>
 	<h1>BibTeX Tidy - Cleaner and Formatter for BibTeX files</h1>
-	<p>This tool tidies bibtex files by making indents and spacing consistent, cleaning unneeded new lines, removing unwanted properties, and sorting entries. <a href="https://github.com/FlamingTempura/bibtex-tidy">Instructions on GitHub</a>.</p>
+	<p>This tool tidies bibtex files by making indents and spacing consistent, removing duplicates, cleaning unneeded new lines, removing unwanted properties, and sorting entries. The tool also generates statistics about the entries.</p>
 	<p>Enter your bibtex and click "Tidy":</p>
 	<textarea class="bibtex" id="a"></textarea>
 	<h3>Options:</h3>
@@ -59,14 +64,22 @@
 		<label><input name="sort" type="checkbox"> Sort entries by ID</label>
 		<label><input name="curly" type="checkbox" checked="checked"> Use curly braces for values</label>
 		<label><input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible</label>
+		<label><input name="merge" type="checkbox" checked="checked"> Merge duplicates</label>
 	</form>
 	<p><button onclick="tidy()">Tidy</button></p>
-	<div id="error"></div>
-	<h3>Tidied:</h3>
-	<textarea class="bibtex" id="b"></textarea>
+	<div id="result">
+		<div id="error"></div>
+		<h3>Tidied:</h3>
+		<textarea class="bibtex" id="b"></textarea>
+		<h3>Messages:</h3>
+		<div id="feedback"></div>
+	</div>
+	<a href="https://github.com/FlamingTempura/bibtex-tidy">Get the code on GitHub</a>.
 
 	<script src="https://unpkg.com/bibtex-tidy"></script>
 	<script>
+		/*jshint esversion: 6 */
+	const $feedback = document.getElementById('feedback');
 	window.tidy = () => {
 		var bibtex = document.getElementById('a').value,
 			options = document.forms.options,
@@ -79,9 +92,21 @@
 				omit: options.omit.value.split(' '),
 				space: Number(options.spaces.value),
 				tab: options.indent.value === 'tabs',
+				merge: options.merge.value === 'on'
 			});
 			document.getElementById('b').value = result.bibtex;
 			document.body.classList.toggle('error', false);
+			$feedback.innerHTML = `Successfully tidied ${result.entries.length} entries.<br>`;
+			if (result.duplicates.length > 0) {
+				$feedback.innerHTML += `<br><strong>${result.duplicates.length} merged:</strong><br>`;
+				result.duplicates.forEach(dupe => $feedback.innerHTML += `- ${dupe.entry.id} merged into ${dupe.duplicateOf.id}<br>`);
+			}
+			[['proceedings', result.proceedings], ['publishers', result.publishers], ['journals', result.journals]].forEach(([key, counts]) => {
+				$feedback.innerHTML += `<br><strong>${Object.keys(counts).length} ${key}:</strong><br>`;
+				Object.keys(counts)
+					.forEach(name => $feedback.innerHTML += `- ${name} (${counts[name]} entries)<br>`);
+			});
+
 		} catch (e) {
 			console.error('bibtex parse problem:', e);
 			document.body.classList.toggle('error', true);
@@ -90,6 +115,7 @@
 			Line ${e.location.start.line} column ${e.location.start.column}<br>
 			${e.message}`;
 		}
+		document.getElementById('result').style.display = 'block';
 	};
 	</script>
 </body>
