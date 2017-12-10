@@ -104,6 +104,7 @@
 			[['proceedings', result.proceedings], ['publishers', result.publishers], ['journals', result.journals]].forEach(([key, counts]) => {
 				$feedback.innerHTML += `<br><strong>${Object.keys(counts).length} ${key}:</strong><br>`;
 				Object.keys(counts)
+					.sort((a, b) => counts[b] - counts[a])
 					.forEach(name => $feedback.innerHTML += `- ${name} (${counts[name]} entries)<br>`);
 			});
 
