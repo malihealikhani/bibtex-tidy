@@ -10,38 +10,87 @@
 		h1 {
 			font-weight: 100;
 		}
+		h3 {
+
+		}
 		a {
 			color: #4183D7;
 		}
-		textarea {
+		textarea.bibtex {
 			width: 100%;
 			height: 400px;
 		}
-		p, textarea {
+		p, textarea, #error {
 			max-width: 780px;
+			box-sizing: border-box;
 		}
 		button {
 			padding: 6px 40px;
 		}
+		label {
+			padding-right: 12px;
+		}
+		textarea[name=omit] {
+			width: 300px;
+			height: 40px;
+		}
+		#error {
+			display: none;
+			background: #D91E18;
+			border-radius: 4px;
+			color: white;
+			padding: 8px;
+		}
+		.error #a { background: #F1A9A0; }
+		.error #error { display: block; }
 	</style>
 </head>
 <body>
-	<h1>BibTeX Tidier</h1>
-	<p>This tool tidies bibtex files by making indents and spacing consistent, and cleaning unneeded new lines. <a href="https://github.com/FlamingTempura/bibtex-tidy">Instructions on GitHub</a>.</p>
+	<h1>BibTeX Tidy - Cleaner and Prettifier for BibTeX files</h1>
+	<p>This tool tidies bibtex files by making indents and spacing consistent, cleaning unneeded new lines, removing unwanted properties, and sorting entries. <a href="https://github.com/FlamingTempura/bibtex-tidy">Instructions on GitHub</a>.</p>
 	<p>Enter your bibtex and click "Tidy":</p>
-	<textarea id="a"></textarea>
+	<textarea class="bibtex" id="a"></textarea>
+	<h3>Options:</h3>
+	<form name="options" onsubmit="return false">
+		Indent:
+			<label><input name="indent" type="radio" value="tabs"> Tabs</label>
+			<label><input name="indent" type="radio" value="spaces" checked="checked"> Spaces <input name="spaces" type="number" value="2"></label>
+		<p>Remove properties (space delimited): <textarea name="omit" placeholder="e.g. abstract keywords"></textarea></p>
+		<label><input name="sort" type="checkbox"> Sort entries by ID</label>
+		<label><input name="curly" type="checkbox" checked="checked"> Use curly braces for values</label>
+		<label><input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible</label>
+	</form>
 	<p><button onclick="tidy()">Tidy</button></p>
-	<p>Tidied:</p>
-	<textarea id="b"></textarea>
+	<div id="error"> Ohhhh it didn't work!!!<br> Damnnn</div>
+	<h3>Tidied:</h3>
+	<textarea class="bibtex" id="b"></textarea>
 
 	<script src="https://unpkg.com/bibtex-tidy"></script>
 	<script>
-	window.tidy = function () {
-		console.log('go')
-		var bibtex = document.getElementById('a').value;
-		var result = bibtexTidy.tidy(bibtex);
-		document.getElementById('b').value = result.bibtex;
+	window.tidy = () => {
+		var bibtex = document.getElementById('a').value,
+			options = document.forms.options,
+			result;
+		try {
+			result = bibtexTidy.tidy(bibtex, {
+				curly: options.curly.value === 'on',
+				numeric: options.numeric.value === 'on',
+				sort: options.sort.value === 'on',
+				omit: options.omit.value.split(' '),
+				space: Number(options.spaces.value),
+				tab: options.indent.value === 'tabs',
+			});
+			document.getElementById('b').value = result.bibtex;
+			document.body.classList.toggle('error', false);
+		} catch (e) {
+			console.error('bibtex parse problem:', e);
+			document.body.classList.toggle('error', true);
+			document.getElementById('b').value = '';
+			document.getElementById('error').innerHTML = `<strong>There's a problem with the bibtex (${e.name})</strong><br>
+			Line ${e.location.start.line} column ${e.location.start.column}<br>
+			${e.message}`;
+		}
 	};
-</script>
+	</script>
 </body>
 </html>
