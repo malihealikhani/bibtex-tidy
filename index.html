@@ -8,7 +8,6 @@
 		body {
 			font-family: Helvetica, sans-serif;
 			color: #333;
-			
 		}
 		h1 {
 			font-weight: 100;
@@ -47,8 +46,10 @@
 		.error #a { background: #F1A9A0; }
 		.error #error { display: block; }
 		.error #feedback { display: none; }
-		#result { display: none; }
+		#result { opacity: 0; }
+		.CodeMirror { border: 1px solid #ccc; }
 	</style>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/codemirror.min.css">
 </head>
 <body>
 	<h1>BibTeX Tidy - Cleaner and Formatter for BibTeX files</h1>
@@ -77,11 +78,17 @@
 	<a href="https://github.com/FlamingTempura/bibtex-tidy">Get the code on GitHub</a>.
 
 	<script src="https://unpkg.com/bibtex-tidy"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/codemirror.min.js"></script>
 	<script>
 		/*jshint esversion: 6 */
-	const $feedback = document.getElementById('feedback');
+	var $feedback = document.getElementById('feedback');
+	var cm1, cm2;
+	var mark;
 	window.tidy = () => {
-		var bibtex = document.getElementById('a').value,
+		if (mark) {
+			mark.clear();
+		}
+		var bibtex = cm1 ? cm1.getValue() : document.getElementById('a').value,
 			options = document.forms.options,
 			result;
 		try {
@@ -94,7 +101,12 @@
 				tab: options.indent.value === 'tabs',
 				merge: options.merge.value === 'on'
 			});
-			document.getElementById('b').value = result.bibtex;
+			if (cm2) {
+		console.log(result.bibtex)
+				cm2.setValue(result.bibtex);
+			} else {
+				document.getElementById('b').value = result.bibtex;
+			}
 			document.body.classList.toggle('error', false);
 			$feedback.innerHTML = `Successfully tidied ${result.entries.length} entries.<br>`;
 			if (result.duplicates.length > 0) {
@@ -115,9 +127,21 @@
 			document.getElementById('error').innerHTML = `<strong>There's a problem with the bibtex (${e.name})</strong><br>
 			Line ${e.location.start.line} column ${e.location.start.column}<br>
 			${e.message}`;
+			if (cm1) {
+				var from = { line: e.location.start.line - 1, ch: e.location.start.column - 1 },
+					to = { line: e.location.end.line - 1, ch: e.location.end.column + 9 };
+				mark = cm1.markText(from, to, { css: 'background: #ffe0df; color: red; font-weight: bold' });
+				cm1.scrollIntoView(from);
+			}
 		}
-		document.getElementById('result').style.display = 'block';
+		document.getElementById('result').style.opacity = 1; // display:none breaks codemirror
 	};
+	try {
+		cm1 = CodeMirror.fromTextArea(document.getElementById('a'), { lineNumbers: true, autofocus: true });
+		cm2 = CodeMirror.fromTextArea(document.getElementById('b'), { lineNumbers: true, readOnly: true });
+	} catch (e) {
+		console.warn('CodeMirror plugin failed', e);
+	}
 	</script>
 </body>
 </html>
