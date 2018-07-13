@@ -95,15 +95,15 @@
 			result;
 		try {
 			result = bibtexTidy.tidy(bibtex, {
-				curly: options.curly.value === 'on',
-				numeric: options.numeric.value === 'on',
-				sort: options.sort.value === 'on',
+				curly: options.curly.checked,
+				numeric: options.numeric.checked,
+				sort: options.sort.checked,
 				omit: options.omit.value.split(' '),
 				space: Number(options.spaces.value),
 				tab: options.indent.value === 'tabs',
-				merge: options.merge.value === 'on',
-				stripEnclosingBraces: options.strip.value === 'on',
-				dropAllCaps: options.dropcaps.value === 'on'
+				merge: options.merge.checked,
+				stripEnclosingBraces: options.strip.checked,
+				dropAllCaps: options.dropcaps.checked
 			});
 			if (cm2) {
 				cm2.setValue(result.bibtex);
