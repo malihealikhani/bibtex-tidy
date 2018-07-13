@@ -67,6 +67,7 @@
 		<label><input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible</label>
 		<label><input name="merge" type="checkbox" checked="checked"> Merge duplicates</label>
 		<label title="e.g. {{Journal of Tea}} to {Journal of Tea}"><input name="strip" type="checkbox"> Strip enclosing braces</label>
+		<label title="e.g. {JOURNAL OF TEA} to {Journal of Tea}"><input name="dropcaps" type="checkbox"> Drop all caps</label>
 	</form>
 	<p><button onclick="tidy()">Tidy</button></p>
 	<div id="result">
@@ -101,10 +102,10 @@
 				space: Number(options.spaces.value),
 				tab: options.indent.value === 'tabs',
 				merge: options.merge.value === 'on',
-				stripEnclosingBraces: options.strip.value === 'on'
+				stripEnclosingBraces: options.strip.value === 'on',
+				dropAllCaps: options.dropcaps.value === 'on'
 			});
 			if (cm2) {
-		console.log(result.bibtex)
 				cm2.setValue(result.bibtex);
 			} else {
 				document.getElementById('b').value = result.bibtex;
