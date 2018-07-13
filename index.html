@@ -66,6 +66,7 @@
 		<label><input name="curly" type="checkbox" checked="checked"> Use curly braces for values</label>
 		<label><input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible</label>
 		<label><input name="merge" type="checkbox" checked="checked"> Merge duplicates</label>
+		<label><input name="sortp" type="checkbox" checked="checked"> Sort properties</label>
 		<label title="e.g. {{Journal of Tea}} to {Journal of Tea}"><input name="strip" type="checkbox"> Strip enclosing braces</label>
 		<label title="e.g. {JOURNAL OF TEA} to {Journal of Tea}"><input name="dropcaps" type="checkbox"> Drop all caps</label>
 	</form>
@@ -103,7 +104,8 @@
 				tab: options.indent.value === 'tabs',
 				merge: options.merge.checked,
 				stripEnclosingBraces: options.strip.checked,
-				dropAllCaps: options.dropcaps.checked
+				dropAllCaps: options.dropcaps.checked,
+				sortProperties: options.dropcaps.checked
 			});
 			if (cm2) {
 				cm2.setValue(result.bibtex);
