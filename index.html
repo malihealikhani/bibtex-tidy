@@ -62,7 +62,7 @@
 			<label><input name="indent" type="radio" value="tabs"> Tabs</label>
 			<label><input name="indent" type="radio" value="spaces" checked="checked"> Spaces <input name="spaces" type="number" value="2"></label>
 		<p>Remove properties (space delimited): <textarea name="omit" placeholder="e.g. abstract keywords"></textarea></p>
-		<label><input name="sort" type="checkbox"> Sort entries by ID</label>
+		<label><input name="sort" type="checkbox"> Sort entries by <input name="sortkeys" type="text" value="id"> (space delimited, e.g: id, type, publisher, author)</label>
 		<label><input name="curly" type="checkbox" checked="checked"> Use curly braces for values</label>
 		<label><input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible</label>
 		<label><input name="merge" type="checkbox" checked="checked"> Merge duplicates</label>
@@ -95,10 +95,10 @@
 			options = document.forms.options,
 			result;
 		try {
-			result = bibtexTidy.tidy(bibtex, {
+			result = window.bibtexTidy.tidy(bibtex, {
 				curly: options.curly.checked,
 				numeric: options.numeric.checked,
-				sort: options.sort.checked,
+				sort: options.sort.checked && options.sortkeys.value.split(' '),
 				omit: options.omit.value.split(' '),
 				space: Number(options.spaces.value),
 				tab: options.indent.value === 'tabs',
@@ -142,8 +142,8 @@
 		document.getElementById('result').style.opacity = 1; // display:none breaks codemirror
 	};
 	try {
-		cm1 = CodeMirror.fromTextArea(document.getElementById('a'), { lineNumbers: true, autofocus: true });
-		cm2 = CodeMirror.fromTextArea(document.getElementById('b'), { lineNumbers: true, readOnly: true });
+		cm1 = window.CodeMirror.fromTextArea(document.getElementById('a'), { lineNumbers: true, autofocus: true });
+		cm2 = window.CodeMirror.fromTextArea(document.getElementById('b'), { lineNumbers: true, readOnly: true });
 	} catch (e) {
 		console.warn('CodeMirror plugin failed', e);
 	}
