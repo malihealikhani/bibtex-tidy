@@ -108,7 +108,8 @@ $('#tidy').addEventListener('click', () => {
 						<ul>
 							${Object.keys(counts)
 									.sort()
-									.map(name => `<li>${name} (${counts[name]} entries)</li>`)}
+									.map(name => `<li>${name} (${counts[name]} entries)</li>`)
+									.join('')}
 						</ul>`;
 				});
 				$('#feedback').appendChild(link);
