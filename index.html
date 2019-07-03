@@ -40,15 +40,20 @@ Click Tidy to clean up the entries below
 			<p><a class="btn" href="https://github.com/FlamingTempura/bibtex-tidy">Github</a> <a class="btn" href="https://github.com/FlamingTempura/bibtex-tidy/issues">Report a bug</a></p>
 
 			<h3>Whitespace</h3>
-			<label><input name="indent" type="radio" value="tabs" checked="checked"> Indent with tabs</label>
-			<label>
-				<input name="indent" type="radio" value="spaces"> Indent with spaces
+			<label data-option="tab">
+				<input name="indent" type="radio" value="tabs" checked="checked">
+				<span class="name"></span>
+			</label>
+			<label data-option="space">
+				<input name="indent" type="radio" value="spaces">
+				<span class="name"></span>
 				<div class="suboptions">
 					Spaces: <input name="spaces" type="number" value="2">
 				</div>
 			</label>
-			<label title="Insert whitespace between properties and values so that values are aligned">
-				<input name="enablealign" type="checkbox" checked="checked"> Align values
+			<label data-option="align">
+				<input name="enablealign" type="checkbox" checked="checked">
+				<span class="name"></span>
 				<div class="suboptions">
 					Align values at column: <input name="align" type="number" value="13">
 				</div>
@@ -56,20 +61,28 @@ Click Tidy to clean up the entries below
 
 			<h3>Values</h3>
 
-			<label title="Enclose property values in curly brackets (not quotes)">
-				<input name="curly" type="checkbox" checked="checked"> Use curly braces for values
+			<label data-option="curly">
+				<input name="curly" type="checkbox" checked="checked">
+				<span class="name"></span>
 			</label>
-			<label title="For example, convert {1998} to 1998">
-				<input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible
+			<label data-option="numeric">
+				<input name="numeric" type="checkbox" checked="checked">
+				<span class="name"></span>
 			</label>
-			<label title="For example, convert {{Journal of Tea}} to {Journal of Tea}"><input name="strip" type="checkbox"> Strip enclosing braces</label>
-			<label title="For example, convert {JOURNAL OF TEA} to {Journal of Tea}"><input name="dropcaps" type="checkbox"> Drop all caps</label>
+			<label data-option="stripEnclosingBraces">
+				<input name="strip" type="checkbox">
+				<span class="name"></span>
+			</label>
+			<label data-option="dropAllCaps">
+				<input name="dropcaps" type="checkbox">
+				<span class="name"></span>
+			</label>
 
 			<h3>Sorting</h3>
 
-			<label>
+			<label data-option="sort">
 				<input name="sort" type="checkbox">
-				Sort bibliography entries
+				<span class="name"></span>
 				<div class="suboptions">
 				 	Properties to sort by: <br>
 					<textarea name="sortkeys">id</textarea><br>
@@ -77,8 +90,9 @@ Click Tidy to clean up the entries below
 				</div>
 			</label>
 
-			<label title="Properties will be ordered as title, author, year, month, day, journal">
-				<input name="sortp" type="checkbox" checked="checked"> Sort properties
+			<label data-option="sortProperties">
+				<input name="sortp" type="checkbox" checked="checked">
+				<span class="name"></span>
 				<div class="suboptions">
 				 	Property order: <br>
 					<textarea name="sortpkeys" value>title shorttitle author year month day journal booktitle location on publisher address series volume number pages doi isbn issn url urldate copyright category note metadata</textarea><br>
@@ -88,16 +102,23 @@ Click Tidy to clean up the entries below
 
 			<h3>Clean up</h3>
 
-			<label><input name="merge" type="checkbox" checked="checked"> Merge duplicates</label>
-			<label><input name="omit" type="checkbox">
-				Remove specified properties
+			<label data-option="merge">
+				<input name="merge" type="checkbox" checked="checked">
+				<span class="name"></span>
+			</label>
+			<label data-option="omit">
+				<input name="omit" type="checkbox">
+				<span class="name"></span>
 				<div class="suboptions">
 				 	Properties to sort by: <br>
 					<textarea name="omitkeys" placeholder="e.g. abstract keywords"></textarea><br>
 					(space delimited, e.g: id type publisher author)
 				</div>
 			</label>
-			<label><input name="stripcomments" type="checkbox"> Remove comments</label>
+			<label data-option="stripComments">
+				<input name="stripcomments" type="checkbox">
+				<span class="name"></span>
+			</label>
 		</form>
 
 		<div class="run">

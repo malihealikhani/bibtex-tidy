@@ -157,7 +157,7 @@ a { color: #FFF; }
 	font-weight: 700;
 	text-decoration: none;
 }
-.listlink: after {
+.listlink:after {
 	content: '(click to see)';
 	margin-left: 4px;
 	text-decoration: underline;

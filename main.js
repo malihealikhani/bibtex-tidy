@@ -48,6 +48,12 @@ let options = document.forms.options,
 	cmEditor = CodeMirror.fromTextArea($('#editor textarea'), { lineNumbers: true, autofocus: true }),
 	errorHighlight;
 
+for (let $label of $$('label[data-option]')) {
+	let option = bibtexTidy.options[$label.dataset.option];
+	$label.setAttribute('title', option.description);
+	$label.querySelector('.name').textContent = option.name;
+}
+
 $('#tidy').addEventListener('click', () => {
 	$('#tidy').setAttribute('disabled', true);
 	$('#feedback').style.display = 'none';
