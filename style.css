@@ -191,6 +191,8 @@ a { color: #FFF; }
 	color: #000;
 	overflow: auto;
 	padding: 12px;
+	height: 100%;
+	width: 100%;
 }
 #dlgclose {
 	background: none;
