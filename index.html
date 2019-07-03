@@ -2,151 +2,121 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Online BibTeX Tidy - Clean, format, and analyse BibTeX files</title>
+	<title>Online BibTeX Tidy - Clean up BibTeX files</title>
 	<meta lang="en" name="description" content="Online tool for cleaning up messy BibTeX files by making spacing consistent, removing duplicates, removing unwanted properties, and sorting entries.">
-	<style>
-		body {
-			font-family: Helvetica, sans-serif;
-			color: #333;
-		}
-		h1 {
-			font-weight: 100;
-		}
-		a {
-			color: #4183D7;
-		}
-		textarea.bibtex {
-			width: 100%;
-			height: 400px;
-		}
-		p, textarea, #error {
-			max-width: 780px;
-			box-sizing: border-box;
-		}
-		button {
-			padding: 6px 40px;
-		}
-		label {
-			padding-right: 12px;
-		}
-		textarea[name=omit] {
-			width: 300px;
-			height: 40px;
-		}
-		#error {
-			display: none;
-			background: #D91E18;
-			border-radius: 4px;
-			color: white;
-			padding: 8px;
-		}
-		#feedback {
-			font-size: 13px;
-		}
-		.error #a { background: #F1A9A0; }
-		.error #error { display: block; }
-		.error #feedback { display: none; }
-		#result { opacity: 0; }
-		.CodeMirror { border: 1px solid #ccc; }
-	</style>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/codemirror.min.css">
+	<link rel="stylesheet" href="lib/codemirror.min.css">
+	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-	<h1>BibTeX Tidy - Cleaner and Formatter for BibTeX files</h1>
-	<p>This tool tidies bibtex files by making indents and spacing consistent, removing duplicates, cleaning unneeded new lines, removing unwanted properties, and sorting entries. The tool also generates statistics about the entries.</p>
-	<p>Enter your bibtex and click "Tidy":</p>
-	<textarea class="bibtex" id="a"></textarea>
-	<h3>Options:</h3>
-	<form name="options" onsubmit="return false">
-		Indent:
-			<label><input name="indent" type="radio" value="tabs"> Tabs</label>
-			<label><input name="indent" type="radio" value="spaces" checked="checked"> Spaces <input name="spaces" type="number" value="2"></label>
-		<p>Remove properties (space delimited): <textarea name="omit" placeholder="e.g. abstract keywords"></textarea></p>
-		<label><input name="sort" type="checkbox"> Sort entries by <input name="sortkeys" type="text" value="id"> (space delimited, e.g: id type publisher author)</label>
-		<label><input name="curly" type="checkbox" checked="checked"> Use curly braces for values</label>
-		<label><input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible</label>
-		<label><input name="merge" type="checkbox" checked="checked"> Merge duplicates</label>
-		<label><input name="sortp" type="checkbox" checked="checked"> Sort properties</label>
-		<label title="e.g. {{Journal of Tea}} to {Journal of Tea}"><input name="strip" type="checkbox"> Strip enclosing braces</label>
-		<label title="e.g. {JOURNAL OF TEA} to {Journal of Tea}"><input name="dropcaps" type="checkbox"> Drop all caps</label>
-	</form>
-	<p><button onclick="tidy()">Tidy</button></p>
-	<div id="result">
-		<div id="error"></div>
-		<h3>Tidied:</h3>
-		<textarea class="bibtex" id="b"></textarea>
-		<h3>Messages:</h3>
-		<div id="feedback"></div>
+	<div id="editor">
+		<textarea>
+Click Tidy to clean up the entries below      
+@Book{sweig42,
+  Author =	 { Stefa{n} Sweig },
+  title =	 { The impossible book },
+  publisher =	 { Dead Poet Society},
+  year =	 1942,
+  month =        mar
+}
+@article{steward03,
+  author =	 {Martha Steward},
+  title =	 {Cooking behind bars}, publisher = "Culinary Expert Series",
+  year = {2003}
+}
+@Book{impossible,
+  Author =	 { Stefan Sweig },
+  title =	 { The impossible book },
+  publisher =	 { Dead Poet Society},
+  year =	 1942,
+  month =        mar
+}
+		</textarea>
 	</div>
-	<a href="https://github.com/FlamingTempura/bibtex-tidy">Get the code on GitHub</a>.
 
-	<script src="bibtex-tidy.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/codemirror.min.js"></script>
-	<script>
-		/*jshint esversion: 6 */
-	var $feedback = document.getElementById('feedback');
-	var cm1, cm2;
-	var mark;
-	window.tidy = () => {
-		if (mark) {
-			mark.clear();
-		}
-		var bibtex = cm1 ? cm1.getValue() : document.getElementById('a').value,
-			options = document.forms.options,
-			result;
-		try {
-			result = window.bibtexTidy.tidy(bibtex, {
-				curly: options.curly.checked,
-				numeric: options.numeric.checked,
-				sort: options.sort.checked && options.sortkeys.value.split(' '),
-				omit: options.omit.value.split(' '),
-				space: Number(options.spaces.value),
-				tab: options.indent.value === 'tabs',
-				merge: options.merge.checked,
-				stripEnclosingBraces: options.strip.checked,
-				dropAllCaps: options.dropcaps.checked,
-				sortProperties: options.sortp.checked
-			});
-			if (cm2) {
-				cm2.setValue(result.bibtex);
-			} else {
-				document.getElementById('b').value = result.bibtex;
-			}
-			document.body.classList.toggle('error', false);
-			$feedback.innerHTML = `Successfully tidied ${result.entries.length} entries.<br>`;
-			if (result.duplicates.length > 0) {
-				$feedback.innerHTML += `<br><strong>${result.duplicates.length} merged:</strong><br>`;
-				result.duplicates.forEach(dupe => $feedback.innerHTML += `- ${dupe.entry.id} merged into ${dupe.duplicateOf.id}<br>`);
-			}
-			[['proceedings', result.proceedings], ['publishers', result.publishers], ['journals', result.journals]].forEach(([key, counts]) => {
-				$feedback.innerHTML += `<br><strong>${Object.keys(counts).length} ${key}:</strong><br>`;
-				Object.keys(counts)
-					.sort()
-					.forEach(name => $feedback.innerHTML += `- ${name} (${counts[name]} entries)<br>`);
-			});
+	<div id="sidebar">
+		<form name="options" onsubmit="return false">
+			<h1>BibTeX Tidy</h1>
+			<p>This tool tidies bibtex files by fixing inconsistent whitespace, removing duplicates, removing unwanted properties, and sorting entries.</p>
+			<p><a class="btn" href="https://github.com/FlamingTempura/bibtex-tidy">Github</a> <a class="btn" href="https://github.com/FlamingTempura/bibtex-tidy/issues">Report a bug</a></p>
 
-		} catch (e) {
-			console.error('bibtex parse problem:', e);
-			document.body.classList.toggle('error', true);
-			document.getElementById('b').value = '';
-			document.getElementById('error').innerHTML = `<strong>There's a problem with the bibtex (${e.name})</strong><br>
-			Line ${e.location.start.line} column ${e.location.start.column}<br>
-			${e.message}`;
-			if (cm1) {
-				var from = { line: e.location.start.line - 1, ch: e.location.start.column - 1 },
-					to = { line: e.location.end.line - 1, ch: e.location.end.column + 9 };
-				mark = cm1.markText(from, to, { css: 'background: #ffe0df; color: red; font-weight: bold' });
-				cm1.scrollIntoView(from);
-			}
-		}
-		document.getElementById('result').style.opacity = 1; // display:none breaks codemirror
-	};
-	try {
-		cm1 = window.CodeMirror.fromTextArea(document.getElementById('a'), { lineNumbers: true, autofocus: true });
-		cm2 = window.CodeMirror.fromTextArea(document.getElementById('b'), { lineNumbers: true, readOnly: true });
-	} catch (e) {
-		console.warn('CodeMirror plugin failed', e);
-	}
-	</script>
+			<h3>Whitespace</h3>
+			<label><input name="indent" type="radio" value="tabs" checked="checked"> Indent with tabs</label>
+			<label>
+				<input name="indent" type="radio" value="spaces"> Indent with spaces
+				<div class="suboptions">
+					Spaces: <input name="spaces" type="number" value="2">
+				</div>
+			</label>
+			<label title="Insert whitespace between properties and values so that values are aligned">
+				<input name="enablealign" type="checkbox" checked="checked"> Align values
+				<div class="suboptions">
+					Align values at column: <input name="align" type="number" value="13">
+				</div>
+			</label>
+
+			<h3>Values</h3>
+
+			<label title="Enclose property values in curly brackets (not quotes)">
+				<input name="curly" type="checkbox" checked="checked"> Use curly braces for values
+			</label>
+			<label title="For example, convert {1998} to 1998">
+				<input name="numeric" type="checkbox" checked="checked"> Use numeric values where possible
+			</label>
+			<label title="For example, convert {{Journal of Tea}} to {Journal of Tea}"><input name="strip" type="checkbox"> Strip enclosing braces</label>
+			<label title="For example, convert {JOURNAL OF TEA} to {Journal of Tea}"><input name="dropcaps" type="checkbox"> Drop all caps</label>
+
+			<h3>Sorting</h3>
+
+			<label>
+				<input name="sort" type="checkbox">
+				Sort bibliography entries
+				<div class="suboptions">
+				 	Properties to sort by: <br>
+					<textarea name="sortkeys">id</textarea><br>
+					(space delimited, e.g: id type publisher author)
+				</div>
+			</label>
+
+			<label title="Properties will be ordered as title, author, year, month, day, journal">
+				<input name="sortp" type="checkbox" checked="checked"> Sort properties
+				<div class="suboptions">
+				 	Property order: <br>
+					<textarea name="sortpkeys" value>title shorttitle author year month day journal booktitle location on publisher address series volume number pages doi isbn issn url urldate copyright category note metadata</textarea><br>
+					(space delimited, e.g: title author year)
+				</div>
+			</label>
+
+			<h3>Clean up</h3>
+
+			<label><input name="merge" type="checkbox" checked="checked"> Merge duplicates</label>
+			<label><input name="omit" type="checkbox">
+				Remove specified properties
+				<div class="suboptions">
+				 	Properties to sort by: <br>
+					<textarea name="omitkeys" placeholder="e.g. abstract keywords"></textarea><br>
+					(space delimited, e.g: id type publisher author)
+				</div>
+			</label>
+			<label><input name="stripcomments" type="checkbox"> Remove comments</label>
+		</form>
+
+		<div class="run">
+			<div id="feedback"></div>
+			<button id="tidy">Tidy</button>
+		</div>
+	</div>
+
+	<div id="dlg">
+		<div id="dlginner">
+			<button id="dlgclose">&times;</button>
+			<div id="dlgcontent">
+			</div>
+		</div>
+	</div>
+
+	<script src="lib/bibtex-tidy.js"></script>
+	<script src="lib/codemirror.min.js"></script>
+	<script src="lib/codemirror.simple.js"></script>
+	<script src="main.js"></script>
 </body>
 </html>
