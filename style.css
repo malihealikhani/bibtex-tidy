@@ -100,7 +100,7 @@ a { color: #FFF; }
 	color: transparent;
 	position: relative;
 }
-#sidebar #tidy[disabled]: after {
+#sidebar #tidy[disabled]:after {
 	animation: pulse .9s infinite linear;
 	background: #FFF;
 	border-radius: 50%;
