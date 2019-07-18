@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<title>Online BibTeX Tidy - Clean up BibTeX files</title>
-	<meta lang="en" name="description" content="Online tool for cleaning up messy BibTeX files by making spacing consistent, removing duplicates, removing unwanted properties, and sorting entries.">
+	<meta lang="en" name="description" content="Online tool for cleaning up messy BibTeX files by making spacing consistent, removing duplicates, removing unwanted fields, and sorting entries.">
 	<link rel="stylesheet" href="lib/codemirror.min.css">
 	<link rel="stylesheet" href="style.css">
 </head>
@@ -36,7 +36,7 @@ Click Tidy to clean up the entries below
 	<div id="sidebar">
 		<form name="options" onsubmit="return false">
 			<h1>BibTeX Tidy</h1>
-			<p>This tool tidies bibtex files by fixing inconsistent whitespace, removing duplicates, removing unwanted properties, and sorting entries.</p>
+			<p>This tool tidies bibtex files by fixing inconsistent whitespace, removing duplicates, removing unwanted fields, and sorting entries.</p>
 			<p><a class="btn" href="https://github.com/FlamingTempura/bibtex-tidy">Github</a> <a class="btn" href="https://github.com/FlamingTempura/bibtex-tidy/issues">Report a bug</a></p>
 
 			<h3>Whitespace</h3>
@@ -52,50 +52,58 @@ Click Tidy to clean up the entries below
 				</div>
 			</label>
 			<label data-option="align">
-				<input name="enablealign" type="checkbox" checked="checked">
+				<input type="checkbox" checked="checked">
 				<span class="name"></span>
 				<div class="suboptions">
-					Align values at column: <input name="align" type="number" value="13">
+					Align values at column: <input name="alignnum" type="number" value="13">
 				</div>
 			</label>
 
 			<h3>Values</h3>
 
 			<label data-option="curly">
-				<input name="curly" type="checkbox" checked="checked">
+				<input type="checkbox" checked="checked">
 				<span class="name"></span>
 			</label>
 			<label data-option="numeric">
-				<input name="numeric" type="checkbox" checked="checked">
+				<input type="checkbox" checked="checked">
 				<span class="name"></span>
 			</label>
 			<label data-option="stripEnclosingBraces">
-				<input name="strip" type="checkbox">
+				<input type="checkbox">
 				<span class="name"></span>
 			</label>
 			<label data-option="dropAllCaps">
-				<input name="dropcaps" type="checkbox">
+				<input type="checkbox">
+				<span class="name"></span>
+			</label>
+			<label data-option="escape">
+				<input type="checkbox">
+				<span class="name"></span>
+			</label>
+			<label data-option="encodeUrls">
+				<input type="checkbox">
 				<span class="name"></span>
 			</label>
 
 			<h3>Sorting</h3>
 
 			<label data-option="sort">
-				<input name="sort" type="checkbox">
+				<input type="checkbox">
 				<span class="name"></span>
 				<div class="suboptions">
-				 	Properties to sort by: <br>
-					<textarea name="sortkeys">id</textarea><br>
-					(space delimited, e.g: id type publisher author)
+				 	Fields to sort by: <br>
+					<textarea name="sortList">key</textarea><br>
+					(space delimited, e.g: key type publisher author)
 				</div>
 			</label>
 
-			<label data-option="sortProperties">
-				<input name="sortp" type="checkbox" checked="checked">
+			<label data-option="sortFields">
+				<input type="checkbox" checked="checked">
 				<span class="name"></span>
 				<div class="suboptions">
-				 	Property order: <br>
-					<textarea name="sortpkeys" value>title shorttitle author year month day journal booktitle location on publisher address series volume number pages doi isbn issn url urldate copyright category note metadata</textarea><br>
+				 	Field order: <br>
+					<textarea name="sortFieldList" value>title shorttitle author year month day journal booktitle location on publisher address series volume number pages doi isbn issn url urldate copyright category note metadata</textarea><br>
 					(space delimited, e.g: title author year)
 				</div>
 			</label>
@@ -103,20 +111,20 @@ Click Tidy to clean up the entries below
 			<h3>Clean up</h3>
 
 			<label data-option="merge">
-				<input name="merge" type="checkbox" checked="checked">
+				<input type="checkbox" checked="checked">
 				<span class="name"></span>
 			</label>
 			<label data-option="omit">
-				<input name="omit" type="checkbox">
+				<input type="checkbox">
 				<span class="name"></span>
 				<div class="suboptions">
-				 	Properties to sort by: <br>
-					<textarea name="omitkeys" placeholder="e.g. abstract keywords"></textarea><br>
+				 	Fields to omit: <br>
+					<textarea name="omitList" placeholder="e.g. abstract keywords"></textarea><br>
 					(space delimited, e.g: id type publisher author)
 				</div>
 			</label>
 			<label data-option="stripComments">
-				<input name="stripcomments" type="checkbox">
+				<input type="checkbox">
 				<span class="name"></span>
 			</label>
 		</form>

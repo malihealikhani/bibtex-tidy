@@ -49,9 +49,14 @@ let options = document.forms.options,
 	errorHighlight;
 
 for (let $label of $$('label[data-option]')) {
-	let option = bibtexTidy.options[$label.dataset.option];
+	let key = $label.dataset.option,
+		option = bibtexTidy.options[key],
+		$input = $label.querySelector('input');
 	$label.setAttribute('title', option.description);
 	$label.querySelector('.name').textContent = option.name;
+	if (!$input.getAttribute('name')) {
+		$input.setAttribute('name', key);
+	}
 }
 
 $('#tidy').addEventListener('click', () => {
@@ -67,16 +72,18 @@ $('#tidy').addEventListener('click', () => {
 		opt = {
 			curly: options.curly.checked,
 			numeric: options.numeric.checked,
-			sort: options.sort.checked && options.sortkeys.value.split(/[\n\t ,]+/),
-			omit: options.omit.checked && options.omitkeys.value.split(/[\n\t ,]+/),
+			sort: options.sort.checked && options.sortList.value.split(/[\n\t ,]+/),
+			omit: options.omit.checked && options.omitList.value.split(/[\n\t ,]+/),
 			space: Number(options.spaces.value),
 			tab: options.indent.value === 'tabs',
-			align: options.enablealign.checked ? Number(options.align.value) : 0,
+			align: options.align.checked ? Number(options.alignnum.value) : 0,
 			merge: options.merge.checked,
-			stripEnclosingBraces: options.strip.checked,
-			dropAllCaps: options.dropcaps.checked,
-			sortProperties: options.sortp.checked && options.sortpkeys.value.split(/[\n\t ,]+/),
-			stripComments: options.stripcomments.checked
+			stripEnclosingBraces: options.stripEnclosingBraces.checked,
+			dropAllCaps: options.dropAllCaps.checked,
+			sortFields: options.sortFields.checked && options.sortFieldList.value.split(/[\n\t ,]+/),
+			stripComments: options.stripComments.checked,
+			encodeUrls: options.encodeUrls.checked,
+			escape: options.escape.checked
 		};
 	setTimeout(() => {
 		try {
@@ -85,34 +92,15 @@ $('#tidy').addEventListener('click', () => {
 			
 			$('#feedback').innerHTML += `<strong>Successful!</strong><br>Tidied ${result.entries.length} entries.<br><br>`;
 
+			let warnings =  result.warnings.filter(w => w.code !== 'DUPLICATE_ENTRY');
+			$('#feedback').innerHTML += warnings.map(dupe => dupe.message).join('');
+
 			if (opt.merge) {
-				$('#feedback').innerHTML += `<strong>${result.duplicates.length} merged${result.duplicates.length > 0 ? ':' : ''}</strong><br>`;
-				if (result.duplicates.length > 0) {
-					$('#feedback').innerHTML += '<ul>' + result.duplicates.map(dupe => `<li>${dupe.entry.id} merged into ${dupe.duplicateOf.id}</li>`).join('') + '</ul>';
+				let dupes = result.warnings.filter(w => w.code === 'DUPLICATE_ENTRY');
+				$('#feedback').innerHTML += `<strong>${dupes.length} merged${dupes.length > 0 ? ':' : ''}</strong><br>`;
+				if (dupes.length > 0) {
+					$('#feedback').innerHTML += '<ul>' + dupes.map(dupe => `<li>${dupe.message}</li>`).join('') + '</ul>';
 				}
-			}
-			let lists = [
-				['proceedings', result.proceedings],
-				['publishers', result.publishers],
-				['journals', result.journals]
-			];
-			for (let [key, counts] of lists) {
-				let link = document.createElement('a');
-				link.classList.add('listlink');
-				link.innerHTML = `${Object.keys(counts).length} unique ${key}`;
-				link.href = 'javascript:;';
-				link.addEventListener('click', () => {
-					$('#dlg').style.display = 'block';
-					$('#dlgcontent').innerHTML = `
-						<strong>${Object.keys(counts).length} unique ${key}:</strong>
-						<ul>
-							${Object.keys(counts)
-									.sort()
-									.map(name => `<li>${name} (${counts[name]} entries)</li>`)
-									.join('')}
-						</ul>`;
-				});
-				$('#feedback').appendChild(link);
 			}
 
 		} catch (e) {
