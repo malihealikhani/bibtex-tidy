@@ -7,11 +7,11 @@ CodeMirror.defineSimpleMode('simplemode', { // bibtex syntax highlighting
 		{ regex: /(\s*)(@preamble)(\s*\()/i, token: [null, 'variable-2'], push: 'parenthesised' },
 		{ regex: /(\s*)(@string)(\s*{)/i, token: [null, 'variable-2'], push: 'braced' },
 		{ regex: /(\s*)(@string)(\s*\()/i, token: [null, 'variable-2'], push: 'parenthesised' },
-		{ regex: /(\s*)(@\w+)(\s*\{\s*)(\w+)(\s*,)/, token: [null, 'variable-2', null, 'variable-3'], push: 'entry' },
+		{ regex: /(\s*)(@[^=#,{}()[\] \t\n\r]+)(\s*\{\s*)([^=#,{}()[\] \t\n\r]+)(\s*,)/, token: [null, 'variable-2', null, 'variable-3'], push: 'entry' },
 		{ regex: /.*/, token: 'comment' },
 	],
 	entry: [
-		{ regex: /(\w+)(\s*)(=)/, token: ['keyword', null, 'operator']},
+		{ regex: /([^=,{}()[\]\t\n\r]+)(\s*)(=)/, token: ['keyword', null, 'operator']},
 		{ regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: 'string' },
 		{ regex: /\d+/i, token: 'number' },
 		{ regex: /\{/, push: 'braced' },
