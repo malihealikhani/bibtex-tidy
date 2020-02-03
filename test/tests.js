@@ -26,7 +26,7 @@ const cli = (bibtex, options = {}) => {
 
 	console.log('./bin/bibtex-tidy ' + args.join(' '));
 
-	let proc = spawnSync(path.resolve(__dirname, '../bin/bibtex-tidy'), args),
+	let proc = spawnSync(path.resolve(__dirname, '../bin/bibtex-tidy'), args, { timeout: 3000 }),
 		tidied = fs.readFileSync(__dirname + '/.tmp.bib', 'utf8'),
 		warnings = (proc.stderr.toString() || '').split('\n')
 			.filter(line => line.includes(': '))
