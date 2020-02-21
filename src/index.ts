@@ -2,7 +2,11 @@
 'use strict';
 
 //import parser from 'bibtex-parse';
-import parser from '/home/peter/projects/bibtex-parse/';
+import parser, {
+	BibTeXItem,
+	BibTeXEntryItem,
+	Value
+} from '/home/peter/projects/bibtex-parse/src/index';
 
 import unicode from './unicode.tsv'; // source: https://raw.githubusercontent.com/pkgw/worklog-tools/master/unicode_to_latex.py
 
@@ -49,127 +53,101 @@ const MONTHS = [
 	'dec'
 ];
 
-const OPTIONS = {
-	omit: {
-		name: 'Remove specified fields',
-		description: 'Remove specified fields from bibliography entries.',
-		cliExamples: ['--omit=id,name'],
-		type: 'array',
-		value: []
-	},
-	curly: {
-		name: 'Enclose values in curly braces',
-		description:
-			'Enclose all property values in braces. Quoted values will be converted to braces.',
-		type: 'boolean',
-		value: false
-	},
-	numeric: {
-		name: 'Use numeric values where possible',
-		description:
-			'Strip quotes and braces from numeric/month values. For example, {1998} will become 1998.',
-		type: 'boolean',
-		value: false
-	},
-	space: {
-		name: 'Indent with spaces',
-		description:
-			'Prefix all fields with the specified number of spaces (ignored if tab is set).',
-		cliExamples: ['--space=2 (default)', '--space=4'],
-		type: 'number',
-		value: 2
-	},
-	tab: {
-		name: 'Indent with tabs',
-		description: 'Prefix all fields with a tab.',
-		type: 'boolean',
-		value: false
-	},
-	align: {
-		name: 'Align values',
-		description:
-			'Insert whitespace between fields and values so that values are visually aligned.',
-		type: 'number',
-		cliExamples: ['--align=14 (default)', '--no-align'],
-		value: 14
-	},
-	sort: {
-		name: 'Sort bibliography entries',
-		description: 'Sort entries by specified fields.',
-		cliExamples: [
-			'--sort (sort by id)',
-			'--sort=-year,name (sort year descending then name ascending)',
-			'--sort=name,year'
-		],
-		type: 'array',
-		value: false
-	},
-	merge: {
-		name: 'Merge duplicate entries',
-		description:
-			'Two entries are considered duplicates in the following cases: (a) their DOIs are identical, (b) their abstracts are identical, or (c) their authors and titles are both identical. The firstmost entry is kept and any extra properties from duplicate entries are incorporated.',
-		type: 'boolean',
-		value: false
-	},
-	stripEnclosingBraces: {
-		name: 'Strip double-braced values.',
-		description:
-			'Where an entire value is enclosed in double braces, remove the extra braces. For example, convert {{Journal of Tea}} to {Journal of Tea}.',
-		type: 'boolean',
-		value: false
-	},
-	dropAllCaps: {
-		name: 'Drop all caps',
-		description:
-			'Where values are all caps, make them title case. For example, convert {JOURNAL OF TEA} to {Journal of Tea}.',
-		type: 'boolean',
-		value: false
-	},
-	escape: {
-		name: 'Escape special characters',
-		description:
-			'Escape special characters, such as umlaut. This ensures correct typesetting with latex.',
-		cliExamples: ['--escape (default)', '--no-escape'],
-		type: 'boolean',
-		value: true
-	},
-	sortFields: {
-		name: 'Sort fields',
-		description: `Sort the fields within entries. The default sort order is ${DEFAULT_FIELD_ORDER.join(
-			', '
-		)}. Alternatively you can specify space delimited properties.`,
-		cliExamples: ['--sort-fields=name,author'],
-		type: 'array',
-		value: false
-	},
-	stripComments: {
-		name: 'Remove comments',
-		description: 'Remove all comments from the bibtex source.',
-		type: 'boolean',
-		value: false
-	},
-	encodeUrls: {
-		name: 'Encode URLs',
-		description: 'Replace invalid URL characters with percent encoded values.',
-		type: 'boolean',
-		value: false
-	},
-	tidyComments: {
-		name: 'Tidy comments',
-		description: 'Remove whitespace surrounding comments.',
-		type: 'boolean',
-		value: true
-	}
-};
+interface Options {
+	// Remove specified fields
+	// Remove specified fields from bibliography entries.
+	// @cliExample --omit=id,name
+	omit?: string[];
+	// Enclose values in curly braces
+	// Enclose all property values in braces. Quoted values will be converted to braces.
+	// default false
+	curly?: boolean;
+	// Use numeric values where possible
+	// Strip quotes and braces from numeric/month values. For example, {1998} will become 1998. Very long numbers will be BigInts
+	// default false
+	numeric?: boolean;
+	// Indent with spaces
+	// Prefix all fields with the specified number of spaces (ignored if tab is set).
+	//'--space=2 (default)', '--space=4']
+	// default 2
+	space?: number | boolean;
+	// Indent with tabs
+	// Prefix all fields with a tab.
+	// default false
+	tab?: boolean;
+	// Align values
+	// Insert whitespace between fields and values so that values are visually aligned.
+	// cliExamples: ['--align=14 (default)', '--no-align'],
+	// default 14
+	align?: number | boolean;
+	// Sort bibliography entries
+	// Sort entries by specified fields.
+	// cliExamples: [
+	// 	'--sort (sort by id)',
+	// 	'--sort=-year,name (sort year descending then name ascending)',
+	// 	'--sort=name,year'
+	// ],
+	// default false
+	sort?: string[] | boolean;
 
-const defaults = {};
-for (const k of Object.keys(OPTIONS)) {
-	defaults[k] = OPTIONS[k].value;
+	// Merge duplicate entries',
+	// Two entries are considered duplicates in the following cases: (a) their DOIs are identical, (b) their abstracts are identical, or (c) their authors and titles are both identical. The firstmost entry is kept and any extra properties from duplicate entries are incorporated.
+	// default false
+	merge?: boolean;
+
+	// Strip double-braced values.
+	// Where an entire value is enclosed in double braces, remove the extra braces. For example, convert {{Journal of Tea}} to {Journal of Tea}.',
+	// default false
+	stripEnclosingBraces?: boolean;
+	// Drop all caps
+	// Where values are all caps, make them title case. For example, convert {JOURNAL OF TEA} to {Journal of Tea}.',
+	// default false,
+	dropAllCaps?: boolean;
+	// Escape special characters
+	// Escape special characters, such as umlaut. This ensures correct typesetting with latex.
+	// cliExamples: ['--escape (default)', '--no-escape'],
+	// default true,
+	escape?: boolean;
+	// Sort fields
+	// Sort the fields within entries. The default sort order is ${DEFAULT_FIELD_ORDER.join(
+	// 		', '
+	// 	)}. Alternatively you can specify space delimited properties.`,
+	// 	cliExamples: ['--sort-fields=name,author'],
+	// default: false,
+	sortFields?: boolean | string[];
+	// Remove comments - Remove all comments from the bibtex source.',
+	// default: false,
+	stripComments?: boolean;
+	// Encode URLs - Replace invalid URL characters with percent encoded values.
+	// default: false,
+	encodeUrls?: boolean;
+	// Tidy comments - Remove whitespace surrounding comments.',
+	// default: true
+	tidyComments?: boolean;
+	// @deprecated Use sortFields
+	sortProperties?: boolean | string[];
 }
+
+interface Output {
+	bibtex: string;
+	warnings: Warning[];
+	entries: BibTeXEntryItem[];
+}
+type Datatype = 'braced' | 'quoted' | null;
+interface Warning {
+	code: 'DUPLICATE_ENTRY' | 'MISSING_KEY' | 'DUPLICATE_KEY';
+	message: string;
+	entry: BibTeXEntryItem;
+	duplicateOf?: BibTeXEntryItem;
+}
+
+const DEFAULTS: Options = {
+	tidyComments: true
+};
 
 const specialCharacters = new Map(unicode);
 
-const escapeSpecialCharacters = str => {
+const escapeSpecialCharacters = (str: string): string => {
 	let newstr = '';
 	let escapeMode;
 	for (let i = 0; i < str.length; i++) {
@@ -194,56 +172,80 @@ const escapeSpecialCharacters = str => {
 	return newstr;
 };
 
-const titleCase = str =>
+const titleCase = (str: string): string =>
 	str.replace(
 		/\w\S*/g,
 		txt => txt.charAt(0).toLocaleUpperCase() + txt.substr(1).toLocaleLowerCase()
 	);
 
-const stripWhitespace = str =>
+const stripWhitespace = (str: string): string =>
 	String(str)
 		.replace(/\W/g, '')
 		.toLocaleLowerCase();
 
-const get = (item, name) =>
-	item.fields.find(
-		f => f.name.toLocaleUpperCase() === name.toLocaleUpperCase()
-	) || null;
-
-const getValue = (item, name) => {
-	const field = get(item, name);
-	return field ? field.value : null;
+const get = (item: BibTeXEntryItem, name: string) => {
+	const n = name.toLocaleUpperCase();
+	return item.fields.find(f => f.name.toLocaleUpperCase() === name);
 };
 
-const tidy = (input, options = {}) => {
-	options = { ...defaults, ...options }; // make a copy of options with defaults
+const getValue = (item, name: string): Value => get(item, name)?.value;
+
+const renderValue = (
+	value: Value,
+	datatype: Datatype,
+	forceBrace?: boolean
+): string => {
+	if (datatype === 'braced' || forceBrace) return `{${value}}`;
+	if (datatype === 'quoted') return `"${value}"`;
+	return String(value);
+};
+
+const tidy = (input, options?: Options): Output => {
+	options = { ...DEFAULTS, ...options }; // make a copy of options with defaults
+
+	const sort: string[] = [];
+	let indent: string = '';
+	const sortFields: string[] = [];
+	const merge: boolean = options.merge;
+	const align: number =
+		options.align === true ? 14 : options.align === false ? 0 : options.align;
+	const omit: Set<string> = new Set();
+	const stripEnclosingBraces: boolean = options.stripEnclosingBraces;
+	const dropAllCaps: boolean = options.dropAllCaps;
+	const encodeUrls: boolean = options.encodeUrls;
+	const curly: boolean = options.curly;
+	const numeric: boolean = options.numeric;
 
 	if (options.sort === true) {
-		options.sort = ['key'];
+		sort.push('key');
+	} else if (options.sort) {
+		sort.push(...options.sort);
 	}
 	if (options.space === true) {
-		options.space = 2;
+		indent = '  ';
+	} else if (options.space) {
+		indent = ' '.repeat(options.space);
+	} else if (options.tab) {
+		indent = '\t';
 	}
+
 	if (options.sortProperties) {
 		// legacy
 		options.sortFields = options.sortProperties;
 	}
 	if (options.sortFields === true) {
-		options.sortFields = DEFAULT_FIELD_ORDER;
+		sortFields.push(...DEFAULT_FIELD_ORDER);
+	} else if (options.sortFields) {
+		sortFields.push(...options.sortFields);
 	}
 	if (options.omit instanceof Array) {
-		options.omit = new Set(options.omit);
-	} else if (options.omit === false || !(options.omit instanceof Array)) {
-		options.omit = new Set();
-	}
-	if (options.align === false) {
-		options.align = 1;
+		options.omit.forEach(a => omit.add(a));
 	}
 
-	const items = parser.parse(input);
+	const items: BibTeXItem[] = parser.parse(input);
 	const hashes = [];
 	const keys = new Set();
-	const warnings = [];
+	const warnings: Warning[] = [];
 	let preceedingMeta = []; // comments, preambles, and strings which should be kept with an entry
 	for (const item of items) {
 		if (item.itemtype !== 'entry') {
@@ -266,7 +268,7 @@ const tidy = (input, options = {}) => {
 			}
 			keys.add(item.key);
 
-			if (options.merge) {
+			if (merge) {
 				const hash = {
 					entry: item,
 					doi: get(item, 'doi') ? stripWhitespace(getValue(item, 'doi')) : null,
@@ -303,9 +305,9 @@ const tidy = (input, options = {}) => {
 				}
 			}
 
-			if (options.sort) {
+			if (sort.length > 0) {
 				item.index = {};
-				for (let key of options.sort) {
+				for (let key of sort) {
 					if (key.startsWith('-')) key = key.slice(1);
 					// if no value, then use \ufff0 so entry will be last
 					item.index[key] = String(
@@ -320,9 +322,9 @@ const tidy = (input, options = {}) => {
 		}
 	}
 
-	if (options.sort) {
-		for (let i = options.sort.length - 1; i >= 0; i--) {
-			let key = options.sort[i];
+	if (sort.length > 0) {
+		for (let i = sort.length - 1; i >= 0; i--) {
+			let key = sort[i];
 			const desc = key.startsWith('-');
 			if (desc) key = key.slice(1);
 			items.sort((a, b) => {
@@ -334,7 +336,7 @@ const tidy = (input, options = {}) => {
 	}
 
 	let bibtex = '';
-	const indent = options.tab ? '\t' : ' '.repeat(options.space);
+
 	for (const item of items) {
 		if (item.duplicate) {
 			continue;
@@ -355,14 +357,14 @@ const tidy = (input, options = {}) => {
 			let props = new Set();
 			for (const { name } of item.fields) {
 				const lname = name.toLocaleLowerCase();
-				if (!options.omit.has(lname)) props.add(lname);
+				if (!omit.has(lname)) props.add(lname);
 			}
 			props = [...props];
 
-			if (options.sortFields) {
-				props = props.sort((a, b) => {
-					const indexA = options.sortFields.indexOf(a);
-					const indexB = options.sortFields.indexOf(b);
+			if (sortFields) {
+				props.sort((a, b) => {
+					const indexA = sortFields.indexOf(a);
+					const indexB = sortFields.indexOf(b);
 					if (indexA > -1 && indexB > -1) return indexA - indexB;
 					if (indexA > -1) return -1;
 					if (indexB > -1) return 1;
@@ -371,7 +373,7 @@ const tidy = (input, options = {}) => {
 			}
 			props = props.map(k => {
 				const v = get(item, k);
-				let output;
+				let output: string;
 				if (v.datatype === 'concatinate') {
 					output = v.value
 						.map(({ value, datatype }) => renderValue(value, datatype))
@@ -380,24 +382,23 @@ const tidy = (input, options = {}) => {
 					let val = String(v.value)
 						.replace(/\s*\n\s*/g, ' ')
 						.trim(); // remove whitespace
-					if (options.stripEnclosingBraces) {
+					if (stripEnclosingBraces) {
 						val = val.replace(/^\{([^{}]*)\}$/g, '$1');
 					}
-					if (options.dropAllCaps && val.match(/^[^a-z]+$/)) {
+					if (dropAllCaps && val.match(/^[^a-z]+$/)) {
 						val = titleCase(val);
 					}
-					if (k === 'url' && options.encodeUrls) {
+					if (k === 'url' && encodeUrls) {
 						val = val.replace(/\\?_/g, '\\%5F'); // must happen before escape special characters
 					}
-					if (options.escape) {
+					if (escape) {
 						val = escapeSpecialCharacters(val);
 					}
 					if (k === 'pages') {
 						val = val.replace(/(\d)\s*-\s*(\d)/g, '$1--$2'); // replace single dash with double dash in page range
 					}
-					val = val.trim();
-					output = renderValue(val, v.datatype, options.curly);
-					if (options.numeric) {
+					output = renderValue(val, v.datatype, curly);
+					if (numeric) {
 						if (val.match(/^[1-9][0-9]*$/)) {
 							output = val; // String(Number(val)).toLowerCase();
 						} else if (
@@ -408,7 +409,7 @@ const tidy = (input, options = {}) => {
 						}
 					}
 				}
-				return `${indent}${k.padEnd(options.align - 1)} = ${output}`;
+				return `${indent}${k.padEnd(align - 1)} = ${output}`;
 			});
 
 			bibtex += `@${item.type.toLowerCase()}{${
@@ -417,15 +418,11 @@ const tidy = (input, options = {}) => {
 		}
 	}
 
-	const entries = items.filter(item => item.itemtype === 'entry');
+	const entries: BibTeXEntryItem[] = items.filter(
+		item => item.itemtype === 'entry'
+	);
 
 	return { bibtex, warnings, entries };
-};
-
-const renderValue = (value, datatype, forceBrace) => {
-	if (datatype === 'braced' || forceBrace) return `{${value}}`;
-	if (datatype === 'quoted') return `"${value}"`;
-	return value;
 };
 
 export default { tidy, options: OPTIONS };

@@ -8,7 +8,6 @@
     "bibtex-tidy": "./bin/bibtex-tidy"
   },
   "dependencies": {
-    "yargs": "^15.1.0",
     "bibtex-parse": "^2.0.0"
   },
   "devDependencies": {
@@ -19,8 +18,8 @@
     "tap": "^14.10.6"
   },
   "scripts": {
-    "test": "rollup -c && tap -t0 test/",
-    "cover": "rollup -c && tap -t0 -j6 --cov --coverage-report=lcov test/",
+    "test": "rollup -c && tap -t30 --bail --no-coverage test/",
+    "cover": "rollup -c && tap -t30 -j6 --coverage --coverage-report=lcov test/",
     "build": "rollup -c"
   },
   "repository": {
