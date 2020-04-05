@@ -102,28 +102,37 @@ $('#tidy').addEventListener('click', () => {
 	if (errorHighlight) {
 		errorHighlight.clear();
 	}
-	let bibtex = cmEditor.getValue(),
-		result,
-		opt = {
-			curly: options.curly.checked,
-			numeric: options.numeric.checked,
-			sort: options.sort.checked && options.sortList.value.split(/[\n\t ,]+/),
-			omit: options.omit.checked
-				? options.omitList.value.split(/[\n\t ,]+/)
-				: undefined,
-			space: Number(options.spaces.value),
-			tab: options.indent.value === 'tabs',
-			align: options.align.checked ? Number(options.alignnum.value) : 0,
-			merge: options.merge.checked,
-			stripEnclosingBraces: options.stripEnclosingBraces.checked,
-			dropAllCaps: options.dropAllCaps.checked,
-			sortFields:
-				options.sortFields.checked &&
-				options.sortFieldList.value.split(/[\n\t ,]+/),
-			stripComments: options.stripComments.checked,
-			encodeUrls: options.encodeUrls.checked,
-			escape: options.escape.checked,
-		};
+	const bibtex = cmEditor.getValue();
+	let result;
+	const opt = {
+		curly: options.curly.checked,
+		numeric: options.numeric.checked,
+		sort: options.sort.checked && options.sortList.value.split(/[\n\t ,]+/),
+		omit: options.omit.checked
+			? options.omitList.value.split(/[\n\t ,]+/)
+			: undefined,
+		space: Number(options.spaces.value),
+		tab: options.indent.value === 'tabs',
+		align: options.align.checked ? Number(options.alignnum.value) : 0,
+		duplicates: options.duplicates.checked
+			? [
+					options.uniqKEY.checked ? 'key' : null,
+					options.uniqDOI.checked ? 'doi' : null,
+					options.uniqABS.checked ? 'abstract' : null,
+					options.uniqCIT.checked ? 'citation' : null,
+			  ].filter((a) => a !== null)
+			: false,
+		merge: options.merge.checked ? options.mergeStrategy.value : false,
+		stripEnclosingBraces: options.stripEnclosingBraces.checked,
+		dropAllCaps: options.dropAllCaps.checked,
+		sortFields:
+			options.sortFields.checked &&
+			options.sortFieldList.value.split(/[\n\t ,]+/),
+		stripComments: options.stripComments.checked,
+		encodeUrls: options.encodeUrls.checked,
+		escape: options.escape.checked,
+	};
+	console.log(options, opt);
 	setTimeout(() => {
 		try {
 			result = bibtexTidy.tidy(bibtex, opt);

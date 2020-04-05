@@ -147,11 +147,21 @@ title shorttitle author year month day journal booktitle location on publisher a
 							<label>
 								<p>What to check:</p>
 								<label>
-									<input type="checkbox" checked="checked" /> Matching Keys
+									<input type="checkbox" name="uniqKEY" checked="checked" />
+									Matching Keys
 								</label>
-								<label> <input type="checkbox" /> Matching DOIs </label>
-								<label> <input type="checkbox" /> Similar citations </label>
-								<label> <input type="checkbox" /> Similar abstracts </label>
+								<label>
+									<input type="checkbox" name="uniqDOI" />
+									Matching DOIs
+								</label>
+								<label>
+									<input type="checkbox" name="uniqCIT" />
+									Similar author and title
+								</label>
+								<label>
+									<input type="checkbox" name="uniqABS" />
+									Similar abstracts
+								</label>
 							</label>
 						</div>
 					</label>
@@ -159,13 +169,12 @@ title shorttitle author year month day journal booktitle location on publisher a
 					<label data-option="merge">
 						<input type="checkbox" />
 						<span class="name"></span>
-
 						<div class="suboptions">
 							<label>
 								<input
 									name="mergeStrategy"
 									type="radio"
-									value="first"
+									value="combine"
 									checked="checked"
 								/>
 								<strong>Combine</strong> (default)<br />
@@ -175,7 +184,7 @@ title shorttitle author year month day journal booktitle location on publisher a
 								</small>
 							</label>
 							<label>
-								<input name="mergeStrategy" type="radio" value="first" />
+								<input name="mergeStrategy" type="radio" value="overwrite" />
 								<strong>Overwrite</strong><br />
 								<small>
 									Keep original entry and merge in fields of duplicates,
@@ -188,7 +197,7 @@ title shorttitle author year month day journal booktitle location on publisher a
 								<small>Only keep the original entry</small>
 							</label>
 							<label>
-								<input name="mergeStrategy" type="radio" value="first" />
+								<input name="mergeStrategy" type="radio" value="last" />
 								<strong>Last</strong><br />
 								<small>Only keep the last found duplicate</small>
 							</label>
